@@ -2,7 +2,7 @@
 TeamColumn — manages the UI for one team:
   • Team name input
   • 5 agent slot rows (empty or occupied by AgentCard)
-  • Bookmark button that opens/closes the AgentPicker overlay
+  • Bookmark button reference for active-state reset when picker closes
 """
 from __future__ import annotations
 import tkinter as tk
@@ -16,8 +16,8 @@ from ui.agent_picker import AgentPicker
 class TeamColumn(tk.Frame):
     """
     side: "left" | "right"
-    get_other_team: callable that returns the other Team instance
-                    (used only to prevent cross-column duplicate check if desired)
+    get_opposite_frame: callable → the other team's container Frame
+                        (picker is placed on top of it)
     """
 
     def __init__(self, parent: tk.Widget,
@@ -26,13 +26,21 @@ class TeamColumn(tk.Frame):
                  get_opposite_frame: callable,
                  **kwargs):
         super().__init__(parent, bg=theme.BG_PANEL, **kwargs)
-        self._side = side          # "left" or "right"
+        self._side = side
         self._team = team
         self._get_opposite_frame = get_opposite_frame
         self._picker: AgentPicker | None = None
         self._slot_frames: list[tk.Frame] = []
+        # Injected by App after both columns exist
+        self._bookmark: tk.Widget | None = None
 
         self._build()
+
+    # ── Public: let App wire the bookmark reference ───────────────────────
+
+    def set_bookmark(self, bookmark):
+        """Give this column a reference to its BookmarkButton."""
+        self._bookmark = bookmark
 
     # ── Construction ──────────────────────────────────────────────────────
 
@@ -65,31 +73,30 @@ class TeamColumn(tk.Frame):
         slots_container.pack(fill="both", expand=True, padx=10, pady=(0, 10))
 
         for i in range(MAX_AGENTS):
-            slot = tk.Frame(slots_container, bg=theme.BG_PANEL)
+            # The slot wrapper must NOT shrink — we enforce card height on it
+            slot = tk.Frame(slots_container, bg=theme.BG_PANEL,
+                             height=theme.CARD_HEIGHT)
             slot.pack(fill="x", pady=3)
+            slot.pack_propagate(False)   # keep fixed height regardless of content
             self._slot_frames.append(slot)
             self._render_slot(i)
 
     # ── Slot rendering ────────────────────────────────────────────────────
 
     def _render_slot(self, index: int):
-        """Render slot *index* — either an empty placeholder or an AgentCard."""
+        """Render slot *index* — empty placeholder or AgentCard."""
         slot = self._slot_frames[index]
-        # Clear current content
         for child in slot.winfo_children():
             child.destroy()
 
         agent = self._team.agents[index]
 
         if agent is None:
-            # Empty placeholder
             placeholder = tk.Frame(slot,
                                     bg=theme.BG_CARD,
-                                    height=theme.CARD_HEIGHT,
                                     highlightbackground=theme.BG_HOVER,
                                     highlightthickness=1)
-            placeholder.pack(fill="x")
-            placeholder.pack_propagate(False)
+            placeholder.place(relx=0, rely=0, relwidth=1, relheight=1)
 
             tk.Label(placeholder,
                      text=f"— slot {index + 1} —",
@@ -99,7 +106,7 @@ class TeamColumn(tk.Frame):
         else:
             card = AgentCard(slot, agent,
                               on_remove=lambda idx=index: self._remove_agent(idx))
-            card.pack(fill="x")
+            card.place(relx=0, rely=0, relwidth=1, relheight=1)
 
     def _render_all_slots(self):
         for i in range(MAX_AGENTS):
@@ -112,7 +119,6 @@ class TeamColumn(tk.Frame):
             return
         self._team.add_agent(agent)
         self._render_all_slots()
-        # Refresh picker exclusions (agent is now selected)
         if self._picker and self._picker.winfo_exists():
             self._picker.refresh(set(self._team.selected_agents()))
 
@@ -127,13 +133,12 @@ class TeamColumn(tk.Frame):
     # ── Picker (bookmark) ────────────────────────────────────────────────
 
     def open_picker(self):
-        """Open the agent picker over the opposite column."""
+        """Toggle the agent picker over the opposite column."""
         if self._picker and self._picker.winfo_exists():
             self._close_picker()
             return
 
         opposite = self._get_opposite_frame()
-
         self._picker = AgentPicker(
             opposite,
             excluded_agents=set(self._team.selected_agents()),
@@ -147,6 +152,9 @@ class TeamColumn(tk.Frame):
         if self._picker and self._picker.winfo_exists():
             self._picker.destroy()
         self._picker = None
+        # Reset the bookmark button back to inactive state
+        if self._bookmark is not None:
+            self._bookmark.deactivate()
 
     def _on_picker_select(self, agent: Agent):
         self._add_agent(agent)

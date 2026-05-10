@@ -83,6 +83,10 @@ class App(tk.Tk):
 
         self._build_divider(divider)
 
+        # Wire bookmark refs so columns can reset them when picker closes via ✕
+        self._col_a.set_bookmark(self._bookmark_a)
+        self._col_b.set_bookmark(self._bookmark_b)
+
     def _build_divider(self, divider: tk.Frame):
         """Central strip: VS label + two bookmark buttons."""
         # Centre everything vertically
