@@ -2,20 +2,28 @@
 AgentCard — the widget displayed per agent slot when an agent is selected.
 Shows portrait, ability icons with names, ultimate highlighted separately.
 A red ✕ button in the top-right allows removal.
+
+Layout (grid):
+  col 0          col 1 (weight=1)
+  ──────────     ──────────────────────────────────────
+  portrait  │  row 0: Agent name
+  (rowspan) │  row 1: Role badge  |  [E] Signature ability
+            │  row 2: [C] ability   [Q] ability
+  ──────────────────────────────────────────────────────
+  row 3 (colspan): ── Ultimate (full width) ──
 """
 from __future__ import annotations
 import tkinter as tk
 from models.agent import Agent
 from ui import theme
 from ui.image_loader import agent_portrait, ability_icon
-from collections.abc import Callable
 
 
 class AgentCard(tk.Frame):
     """Rendered cell for one selected agent."""
 
     def __init__(self, parent: tk.Widget, agent: Agent,
-                 on_remove: Callable[[], None], **kwargs):
+                 on_remove: callable, **kwargs):
         super().__init__(parent,
                          bg=theme.BG_CARD,
                          highlightbackground=theme.BG_HOVER,
@@ -32,6 +40,9 @@ class AgentCard(tk.Frame):
     def _build(self):
         a = self._agent
 
+        # col 1 stretches to fill available width so ult bar goes edge-to-edge
+        self.columnconfigure(1, weight=1)
+
         # ── Remove button (top-right corner) ─────────────────────────────
         remove_btn = tk.Button(
             self, text="✕",
@@ -43,72 +54,82 @@ class AgentCard(tk.Frame):
         )
         remove_btn.place(relx=1.0, rely=0.0, anchor="ne", x=-2, y=2)
 
-        # ── Left side: portrait + role badge ─────────────────────────────
+        # ── Col 0: portrait ──────────────────────────────────────────────
         portrait_img = agent_portrait(a.id, theme.AGENT_THUMB)
         self._images.append(portrait_img)
 
         portrait_lbl = tk.Label(self, image=portrait_img, bg=theme.BG_CARD)
-        portrait_lbl.grid(row=0, column=0, rowspan=3, padx=(8, 6), pady=8,
+        portrait_lbl.grid(row=0, column=0, rowspan=3, padx=(8, 6), pady=(8, 4),
                           sticky="nw")
 
-        # Agent name
+        # ── Row 0: Agent name ─────────────────────────────────────────────
         name_lbl = tk.Label(self,
                              text=a.display_name,
                              bg=theme.BG_CARD,
                              fg=theme.TEXT_PRIMARY,
                              font=theme.FONT_TITLE,
                              anchor="w")
-        name_lbl.grid(row=0, column=1, columnspan=4, sticky="sw", pady=(8, 1))
+        name_lbl.grid(row=0, column=1, sticky="sw", pady=(8, 1), padx=(0, 6))
 
-        # Role badge
+        # ── Row 1: Role badge  +  E (signature) ability ───────────────────
+        role_row = tk.Frame(self, bg=theme.BG_CARD)
+        role_row.grid(row=1, column=1, sticky="ew", padx=(0, 6))
+
         role_color = theme.ROLE_COLORS.get(a.role, theme.TEXT_SECONDARY)
-        role_lbl = tk.Label(self,
-                             text=a.role.upper(),
-                             bg=theme.BG_CARD,
-                             fg=role_color,
-                             font=theme.FONT_SMALL,
-                             anchor="w")
-        role_lbl.grid(row=1, column=1, columnspan=4, sticky="nw")
+        tk.Label(role_row,
+                 text=a.role.upper(),
+                 bg=theme.BG_CARD,
+                 fg=role_color,
+                 font=theme.FONT_SMALL,
+                 anchor="w").pack(side="left")
 
-        # ── Abilities row (C, Q, E) ───────────────────────────────────────
-        ab_frame = tk.Frame(self, bg=theme.BG_CARD)
-        ab_frame.grid(row=2, column=1, columnspan=4, sticky="w", pady=(4, 0))
+        # Separator between role and E ability
+        tk.Label(role_row, text="  │  ",
+                 bg=theme.BG_CARD, fg=theme.TEXT_DISABLED,
+                 font=theme.FONT_SMALL).pack(side="left")
 
-        for ab in a.basic_abilities:
-            self._add_ability_widget(ab_frame, ab, ultimate=False)
+        # E ability (signature)
+        sig = next((ab for ab in a.abilities if ab.key == "E"), None)
+        if sig:
+            self._pack_ability_inline(role_row, sig, ultimate=False)
 
-        # ── Ultimate row ─────────────────────────────────────────────────
+        # ── Row 2: C and Q abilities ──────────────────────────────────────
+        cq_frame = tk.Frame(self, bg=theme.BG_CARD)
+        cq_frame.grid(row=2, column=1, sticky="w", pady=(3, 0), padx=(0, 6))
+
+        for ab in a.abilities:
+            if ab.key in ("C", "Q"):
+                self._pack_ability_inline(cq_frame, ab, ultimate=False)
+
+        # ── Row 3: Ultimate — full width ──────────────────────────────────
         if a.ultimate:
             ult_frame = tk.Frame(self,
                                   bg=theme.BG_PANEL,
                                   highlightbackground=theme.ACCENT_GOLD,
                                   highlightthickness=1)
-            ult_frame.grid(row=3, column=0, columnspan=5,
-                           padx=8, pady=(4, 6), sticky="ew")
-            self._add_ability_widget(ult_frame, a.ultimate, ultimate=True)
+            # columnspan=2 covers portrait col + content col → true full width
+            ult_frame.grid(row=3, column=0, columnspan=2,
+                           padx=8, pady=(6, 8), sticky="ew")
+            self._pack_ability_inline(ult_frame, a.ultimate, ultimate=True)
 
-        # Allow column 5 to absorb leftover space (keeps layout stable)
-        self.columnconfigure(5, weight=1)
+    # ── Helpers ───────────────────────────────────────────────────────────
 
-    def _add_ability_widget(self, parent: tk.Frame, ability, ultimate: bool):
-        """Create a small icon+label pair inside *parent*."""
-        container = tk.Frame(parent,
-                              bg=parent.cget("bg"))
-        container.pack(side="left", padx=(6 if ultimate else 4), pady=3)
+    def _pack_ability_inline(self, parent: tk.Frame, ability, ultimate: bool):
+        """Pack an icon + key/name label into *parent* (side=left)."""
+        bg = parent.cget("bg")
+
+        container = tk.Frame(parent, bg=bg)
+        container.pack(side="left", padx=(6 if ultimate else 2), pady=3)
 
         icon_img = ability_icon(self._agent.id, ability.icon_filename,
                                 theme.ABILITY_ICON)
         self._images.append(icon_img)
 
-        icon_lbl = tk.Label(container, image=icon_img,
-                             bg=parent.cget("bg"))
-        icon_lbl.pack(side="left", padx=(0, 3))
+        tk.Label(container, image=icon_img, bg=bg).pack(side="left", padx=(0, 3))
 
         fg = theme.ACCENT_GOLD if ultimate else theme.TEXT_PRIMARY
-        key_lbl = tk.Label(container,
-                            text=f"[{ability.key}] {ability.name}",
-                            bg=parent.cget("bg"),
-                            fg=fg,
-                            font=theme.FONT_ABILITY if not ultimate else (theme.FONT_FAMILY, 8, "bold"),
-                            anchor="w")
-        key_lbl.pack(side="left")
+        tk.Label(container,
+                 text=f"[{ability.key}] {ability.name}",
+                 bg=bg, fg=fg,
+                 font=(theme.FONT_FAMILY, 8, "bold") if ultimate else theme.FONT_ABILITY,
+                 anchor="w").pack(side="left")
