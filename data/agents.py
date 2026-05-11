@@ -40,8 +40,8 @@ ALL_AGENTS: list[Agent] = [
     ]),
     _make("phoenix", "Phoenix", "Duelist", [
         ("C", "Blaze", "Creates a flame wall", "blaze.png"),
-        ("Q", "Curveball", "Flashes around corners", "curveball.png"),
-        ("E", "Hot Hands", "Throws a fireball", "hothands.png"),
+        ("E", "Curveball", "Flashes around corners", "curveball.png"),
+        ("Q", "Hot Hands", "Throws a fireball", "hothands.png"),
         ("X", "Run It Back", "Marks current location as respawn", "runitback.png"),
     ]),
     _make("raze", "Raze", "Duelist", [
@@ -69,10 +69,10 @@ ALL_AGENTS: list[Agent] = [
         ("X", "Kill Contract", "Opens a rift duel arena", "killcontract.png"),
     ]),
     _make("waylay", "Waylay", "Duelist", [
-        ("C", "Haste", "Dashes forward briefly", "haste.png"),
-        ("Q", "Ricochet", "Bounces a light wave off surfaces", "ricochet.png"),
-        ("E", "Radiance", "Creates a slowing light zone", "radiance_waylay.png"),
-        ("X", "Convergence", "Channels a massive light beam", "convergence.png"),
+        ("C", "Saturate", "Creates a slowing light zone", "saturate.png"),
+        ("Q", "Lightspeed", "Dashes swiftly once/twice", "lightspeed.png"),
+        ("E", "Refract", "Enables to tp back where it was used", "refract.png"),
+        ("X", "Convergent Paths", "Channels a massive light beam", "convergentpaths.png"),
     ]),
 
     # ── Controllers ───────────────────────────────────────────────────────
@@ -101,9 +101,9 @@ ALL_AGENTS: list[Agent] = [
         ("X", "Cosmic Divide", "Channels an infinite cosmic wall", "cosmicdivide.png"),
     ]),
     _make("harbor", "Harbor", "Controller", [
-        ("C", "Cove", "Throws a water shield sphere", "cove.png"),
+        ("E", "Cove", "Throws a water shield sphere", "cove.png"),
         ("Q", "High Tide", "Sends a wall of water", "hightide.png"),
-        ("E", "Cascade", "Creates a wave of water", "cascade.png"),
+        ("C", "Storm Surge", "Creates a wave of water", "stormsurge.png"),
         ("X", "Reckoning", "Creates crashing water geysers", "reckoning.png"),
     ]),
     _make("clove", "Clove", "Controller", [
@@ -146,28 +146,28 @@ ALL_AGENTS: list[Agent] = [
     ]),
     _make("fade", "Fade", "Initiator", [
         ("C", "Seize", "Throws a nightmare orb", "seize.png"),
-        ("Q", "Haunt", "Sends a crawling eye", "haunt.png"),
-        ("E", "Prowler", "Releases a prowling beast", "prowler.png"),
+        ("E", "Haunt", "Sends a crawling eye", "haunt.png"),
+        ("Q", "Prowler", "Releases a prowling beast", "prowler.png"),
         ("X", "Nightfall", "Sends a wave of nightmare energy", "nightfall.png"),
     ]),
     _make("gekko", "Gekko", "Initiator", [
-        ("C", "Dizzy", "Launches a glob that blinds", "dizzy.png"),
+        ("E", "Dizzy", "Launches a glob that blinds", "dizzy.png"),
         ("Q", "Wingman", "Sends Wingman to plant/defuse", "wingman.png"),
-        ("E", "Thrash", "Deploys Thrash to lunge", "thrash.png"),
-        ("X", "Mosh Pit", "Launches Mosh that detonates", "moshpit.png"),
+        ("X", "Thrash", "Deploys Thrash to lunge", "thrash.png"),
+        ("C", "Mosh Pit", "Launches Mosh that detonates", "moshpit.png"),
     ]),
     _make("tejo", "Tejo", "Initiator", [
         ("C", "Stealth Drone", "Deploys a scouting drone", "stealthdrone.png"),
-        ("Q", "Guided Salvo", "Fires guided missiles", "guidedsalvo.png"),
-        ("E", "Special Delivery", "Throws a concussive grenade", "specialdelivery.png"),
+        ("E", "Guided Salvo", "Fires guided missiles", "guidedsalvo.png"),
+        ("Q", "Special Delivery", "Throws a concussive grenade", "specialdelivery.png"),
         ("X", "Armageddon", "Fires a massive missile barrage", "armageddon.png"),
     ]),
 
     # ── Sentinels ─────────────────────────────────────────────────────────
     _make("cypher", "Cypher", "Sentinel", [
         ("C", "Cyber Cage", "Drops a remote cyber cage", "cybercage.png"),
-        ("Q", "Spy Cam", "Places a hidden camera", "spycam.png"),
-        ("E", "Trapwire", "Places a tripwire trap", "trapwire.png"),
+        ("E", "Spy Cam", "Places a hidden camera", "spycam.png"),
+        ("Q", "Trapwire", "Places a tripwire trap", "trapwire.png"),
         ("X", "Neural Theft", "Extracts info from enemies", "neuraltheft.png"),
     ]),
     _make("killjoy", "Killjoy", "Sentinel", [
@@ -178,8 +178,8 @@ ALL_AGENTS: list[Agent] = [
     ]),
     _make("sage", "Sage", "Sentinel", [
         ("C", "Slow Orb", "Throws a slowing orb", "sloworb.png"),
-        ("Q", "Healing Orb", "Heals self or an ally", "healingorb.png"),
-        ("E", "Barrier Orb", "Creates a solid wall", "barrierorb.png"),
+        ("E", "Healing Orb", "Heals self or an ally", "healingorb.png"),
+        ("Q", "Barrier Orb", "Creates a solid wall", "barrierorb.png"),
         ("X", "Resurrection", "Revives a dead ally", "resurrection.png"),
     ]),
     _make("chamber", "Chamber", "Sentinel", [
@@ -196,8 +196,8 @@ ALL_AGENTS: list[Agent] = [
     ]),
     _make("vyse", "Vyse", "Sentinel", [
         ("C", "Shear", "Places a hidden vine trap", "shear.png"),
-        ("Q", "Arc Rose", "Throws a metallic flash", "arcrose.png"),
-        ("E", "Razorvine", "Creates a metallic vine zone", "razorvine.png"),
+        ("E", "Arc Rose", "Throws a metallic flash", "arcrose.png"),
+        ("Q", "Razorvine", "Creates a metallic vine zone", "razorvine.png"),
         ("X", "Steel Garden", "Disarms all enemies in range", "steelgarden.png"),
     ]),
     _make("veto", "Veto", "Sentinel", [

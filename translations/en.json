@@ -1,36 +1,174 @@
 {
-  "_meta": { "language": "English", "code": "en" },
-
-  "jett":     { "C": "Cloudburst",       "Q": "Updraft",          "E": "Tailwind",         "X": "Blade Storm" },
-  "reyna":    { "C": "Leer",             "Q": "Devour",           "E": "Dismiss",          "X": "Empress" },
-  "phoenix":  { "C": "Blaze",            "Q": "Curveball",        "E": "Hot Hands",        "X": "Run It Back" },
-  "raze":     { "C": "Boom Bot",         "Q": "Blast Pack",       "E": "Paint Shells",     "X": "Showstopper" },
-  "yoru":     { "C": "Fakeout",          "Q": "Blindside",        "E": "Gatecrash",        "X": "Dimensional Drift" },
-  "neon":     { "C": "Fast Lane",        "Q": "Relay Bolt",       "E": "High Gear",        "X": "Overdrive" },
-  "iso":      { "C": "Contingency",      "Q": "Double Tap",       "E": "Undercut",         "X": "Kill Contract" },
-  "waylay":   { "C": "Haste",            "Q": "Ricochet",         "E": "Radiance",         "X": "Convergence" },
-
-  "omen":     { "C": "Shrouded Step",    "Q": "Paranoia",         "E": "Dark Cover",       "X": "From the Shadows" },
-  "brimstone":{ "C": "Incendiary",       "Q": "Stim Beacon",      "E": "Sky Smoke",        "X": "Orbital Strike" },
-  "viper":    { "C": "Snake Bite",       "Q": "Poison Cloud",     "E": "Toxic Screen",     "X": "Viper's Pit" },
-  "astra":    { "C": "Nova Pulse",       "E": "Nebula",           "Q": "Gravity Well",     "X": "Cosmic Divide" },
-  "harbor":   { "C": "Cove",             "Q": "High Tide",        "E": "Cascade",          "X": "Reckoning" },
-  "clove":    { "C": "Meddle",           "Q": "Pick-Me-Up",       "E": "Ruse",     "X": "Not Dead Yet" },
-  "miks":    { "C": "Harmonize",           "Q": "M-Pulse",       "E": "Waveform",     "X": "Bassquake" },
-
-
-  "sova":     { "C": "Shock Bolt",       "Q": "Owl Drone",        "E": "Recon Bolt",       "X": "Hunter's Fury" },
-  "breach":   { "C": "Aftershock",       "Q": "Flashpoint",       "E": "Fault Line",       "X": "Rolling Thunder" },
-  "skye":     { "C": "Regrowth",         "Q": "Trailblazer",      "E": "Guiding Light",    "X": "Seekers" },
-  "kay_o":    { "C": "FRAG/ment",        "Q": "FLASH/drive",      "E": "ZERO/point",       "X": "NULL/cmd" },
-  "fade":     { "C": "Seize",            "Q": "Haunt",            "E": "Prowler",          "X": "Nightfall" },
-  "gekko":    { "C": "Dizzy",            "Q": "Wingman",          "E": "Thrash",           "X": "Mosh Pit" },
-  "tejo":     { "C": "Stealth Drone",    "Q": "Guided Salvo",     "E": "Special Delivery", "X": "Armageddon" },
-
-  "cypher":   { "C": "Cyber Cage",       "Q": "Spy Cam",          "E": "Trapwire",         "X": "Neural Theft" },
-  "killjoy":  { "C": "Nanoswarm",        "Q": "Alarmbot",         "E": "Turret",           "X": "Lockdown" },
-  "sage":     { "C": "Slow Orb",         "Q": "Healing Orb",      "E": "Barrier Orb",      "X": "Resurrection" },
-  "chamber":  { "C": "Trademark",        "Q": "Headhunter",       "E": "Rendezvous",       "X": "Tour de Force" },
-  "deadlock": { "C": "Barrier Mesh",     "Q": "Sonic Sensor",     "E": "GravNet",          "X": "Annihilation" },
-  "vyse":     { "C": "Shear",            "Q": "Arc Rose",         "E": "Razorvine",        "X": "Steel Garden" }
+  "_meta": {
+    "code": "en",
+    "language": "English"
+  },
+  "astra": {
+    "C": "Nova Pulse",
+    "E": "Nebula",
+    "Q": "Gravity Well",
+    "X": "Cosmic Divide"
+  },
+  "breach": {
+    "C": "Aftershock",
+    "E": "Fault Line",
+    "Q": "Flashpoint",
+    "X": "Rolling Thunder"
+  },
+  "brimstone": {
+    "C": "Incendiary",
+    "E": "Sky Smoke",
+    "Q": "Stim Beacon",
+    "X": "Orbital Strike"
+  },
+  "chamber": {
+    "C": "Trademark",
+    "E": "Rendezvous",
+    "Q": "Headhunter",
+    "X": "Tour de Force"
+  },
+  "clove": {
+    "C": "Meddle",
+    "E": "Ruse",
+    "Q": "Pick-Me-Up",
+    "X": "Not Dead Yet"
+  },
+  "cypher": {
+    "C": "Cyber Cage",
+    "E": "Trapwire",
+    "Q": "Spy Cam",
+    "X": "Neural Theft"
+  },
+  "deadlock": {
+    "C": "Barrier Mesh",
+    "E": "GravNet",
+    "Q": "Sonic Sensor",
+    "X": "Annihilation"
+  },
+  "fade": {
+    "C": "Seize",
+    "Q": "Prowler",
+    "E": "Haunt",
+    "X": "Nightfall"
+  },
+  "gekko": {
+    "E": "Dizzy",
+    "X": "Thrash",
+    "Q": "Wingman",
+    "C": "Mosh Pit"
+  },
+  "harbor": {
+    "C": "Storm Surge",
+    "E": "Cove",
+    "Q": "High Tide",
+    "X": "Reckoning"
+  },
+  "iso": {
+    "C": "Contingency",
+    "E": "Undercut",
+    "Q": "Double Tap",
+    "X": "Kill Contract"
+  },
+  "jett": {
+    "C": "Cloudburst",
+    "E": "Tailwind",
+    "Q": "Updraft",
+    "X": "Blade Storm"
+  },
+  "kay_o": {
+    "C": "FRAG/ment",
+    "E": "ZERO/point",
+    "Q": "FLASH/drive",
+    "X": "NULL/cmd"
+  },
+  "killjoy": {
+    "C": "Nanoswarm",
+    "E": "Turret",
+    "Q": "Alarmbot",
+    "X": "Lockdown"
+  },
+  "miks": {
+    "C": "Harmonize",
+    "E": "Waveform",
+    "Q": "M-Pulse",
+    "X": "Bassquake"
+  },
+  "neon": {
+    "C": "Fast Lane",
+    "E": "High Gear",
+    "Q": "Relay Bolt",
+    "X": "Overdrive"
+  },
+  "omen": {
+    "C": "Shrouded Step",
+    "E": "Dark Cover",
+    "Q": "Paranoia",
+    "X": "From the Shadows"
+  },
+  "phoenix": {
+    "C": "Blaze",
+    "Q": "Hot Hands",
+    "E": "Curveball",
+    "X": "Run It Back"
+  },
+  "raze": {
+    "C": "Boom Bot",
+    "E": "Paint Shells",
+    "Q": "Blast Pack",
+    "X": "Showstopper"
+  },
+  "reyna": {
+    "C": "Leer",
+    "E": "Dismiss",
+    "Q": "Devour",
+    "X": "Empress"
+  },
+  "sage": {
+    "C": "Slow Orb",
+    "E": "Healing Orb",
+    "Q": "Barrier Orb",
+    "X": "Resurrection"
+  },
+  "skye": {
+    "C": "Regrowth",
+    "E": "Guiding Light",
+    "Q": "Trailblazer",
+    "X": "Seekers"
+  },
+  "sova": {
+    "C": "Shock Bolt",
+    "E": "Recon Bolt",
+    "Q": "Owl Drone",
+    "X": "Hunter's Fury"
+  },
+  "tejo": {
+    "C": "Stealth Drone",
+    "Q": "Special Delivery",
+    "E": "Guided Salvo",
+    "X": "Armageddon"
+  },
+  "viper": {
+    "C": "Snake Bite",
+    "E": "Toxic Screen",
+    "Q": "Poison Cloud",
+    "X": "Viper's Pit"
+  },
+  "vyse": {
+    "C": "Shear",
+    "Q": "Razorvine",
+    "E": "Arc Rose",
+    "X": "Steel Garden"
+  },
+  "waylay": {
+    "C": "Saturate",
+    "E": "Refract",
+    "Q": "Lightspeed",
+    "X": "Convergent Paths"
+  },
+  "yoru": {
+    "C": "Fakeout",
+    "E": "Gatecrash",
+    "Q": "Blindside",
+    "X": "Dimensional Drift"
+  }
 }
