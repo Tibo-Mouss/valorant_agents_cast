@@ -13,7 +13,7 @@ from ui import theme
 from ui.image_loader import agent_portrait
 
 # Columns in the agent grid
-GRID_COLS = 3
+GRID_COLS = 4
 
 
 class AgentPicker(tk.Frame):
