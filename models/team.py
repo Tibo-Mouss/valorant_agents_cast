@@ -28,12 +28,18 @@ class Team:
         return False  # Team is full
 
     def remove_agent(self, agent: Agent) -> bool:
-        """Remove agent from team. Returns True on success."""
+        """Remove agent from team, then compact remaining agents.
+        Returns True on success."""
         for i, slot in enumerate(self._agents):
             if slot == agent:
                 self._agents[i] = None
+                self._compact()
                 return True
         return False
+
+    def _compact(self) -> None:
+        selected = [a for a in self._agents if a is not None]
+        self._agents = selected + [None] * (MAX_AGENTS - len(selected))
 
     def has_agent(self, agent: Agent) -> bool:
         return agent in self._agents

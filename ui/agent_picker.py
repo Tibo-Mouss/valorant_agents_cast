@@ -1,7 +1,7 @@
 """
 AgentPicker — an overlay panel showing all agents in a 3-column grid.
 
-Agents already on the team are greyed-out (not clickable).
+Agents already on the team are greyed-out and can now be clicked to remove them from the team.
 Selecting an agent calls on_select without rebuilding the whole widget —
 only the affected cell is updated, eliminating the flicker.
 """
@@ -173,7 +173,7 @@ class _AgentTile(tk.Frame):
     def __init__(self, parent: tk.Widget, agent: Agent,
                  excluded: bool, on_click: callable, **kwargs):
         super().__init__(parent, bg=theme.BG_OVERLAY,
-                         cursor="" if excluded else "hand2", **kwargs)
+                         cursor="hand2", **kwargs)
         self._agent = agent
         self._excluded = excluded
         self._on_click = on_click
@@ -217,10 +217,9 @@ class _AgentTile(tk.Frame):
     def _apply_state(self):
         """Apply current excluded/active visual state."""
         fg = theme.TEXT_DISABLED if self._excluded else theme.TEXT_PRIMARY
-        cursor = "" if self._excluded else "hand2"
 
         self._name_lbl.configure(fg=fg)
-        self.configure(cursor=cursor)
+        self.configure(cursor="hand2")
 
         if self._excluded:
             self._check_lbl.place(relx=1.0, rely=0.0, anchor="ne", x=-2, y=2)
@@ -248,5 +247,4 @@ class _AgentTile(tk.Frame):
         self._check_lbl.configure(bg=self._bg_normal)
 
     def _on_click_evt(self, event):
-        if not self._excluded:
-            self._on_click(self._agent)
+        self._on_click(self._agent)

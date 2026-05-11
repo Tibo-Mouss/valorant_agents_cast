@@ -37,7 +37,7 @@ FONT_ULTIMATE  = (FONT_FAMILY, 8, "bold")
 
 # ── Layout ────────────────────────────────────────────────────────────────
 WINDOW_MIN_W   = 900
-WINDOW_MIN_H   = 680
+WINDOW_MIN_H   = 900
 CARD_WIDTH     = 300          # min agent card width (resizable)
 CARD_HEIGHT    = 155
 PICKER_WIDTH   = 340

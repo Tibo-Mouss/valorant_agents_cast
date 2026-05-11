@@ -124,11 +124,13 @@ class TeamColumn(tk.Frame):
 
     def _remove_agent(self, index: int):
         agent = self._team.agents[index]
-        if agent:
-            self._team.remove_agent(agent)
-        self._render_slot(index)
-        if self._picker and self._picker.winfo_exists():
-            self._picker.refresh(set(self._team.selected_agents()))
+        self._remove_agent_obj(agent)
+
+    def _remove_agent_obj(self, agent: Agent | None):
+        if agent and self._team.remove_agent(agent):
+            self._render_all_slots()
+            if self._picker and self._picker.winfo_exists():
+                self._picker.refresh(set(self._team.selected_agents()))
 
     # ── Picker (bookmark) ────────────────────────────────────────────────
 
@@ -157,6 +159,10 @@ class TeamColumn(tk.Frame):
             self._bookmark.deactivate()
 
     def _on_picker_select(self, agent: Agent):
-        self._add_agent(agent)
-        if self._team.is_full():
+        if self._team.has_agent(agent):
+            self._remove_agent_obj(agent)
+        else:
+            self._add_agent(agent)
+
+        if self._team.is_full() and not self._team.has_agent(agent):
             self._close_picker()
