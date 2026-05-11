@@ -96,8 +96,8 @@ ALL_AGENTS: list[Agent] = [
     ]),
     _make("astra", "Astra", "Controller", [
         ("C", "Nova Pulse", "Explodes a placed star", "novapulse.png"),
-        ("Q", "Nebula", "Transforms a star into smoke", "nebula.png"),
-        ("E", "Gravity Well", "Creates a pulling vortex", "gravitywell.png"),
+        ("E", "Nebula", "Transforms a star into smoke", "nebula.png"),
+        ("Q", "Gravity Well", "Creates a pulling vortex", "gravitywell.png"),
         ("X", "Cosmic Divide", "Channels an infinite cosmic wall", "cosmicdivide.png"),
     ]),
     _make("harbor", "Harbor", "Controller", [
@@ -109,8 +109,14 @@ ALL_AGENTS: list[Agent] = [
     _make("clove", "Clove", "Controller", [
         ("C", "Meddle", "Throws a decay orb", "meddle.png"),
         ("Q", "Pick-Me-Up", "Steals health from kills", "pickmeup.png"),
-        ("E", "Smoke Screen", "Places a smoke cloud", "smokescreen_clove.png"),
+        ("E", "Ruse", "Places a smoke cloud", "ruse.png"),
         ("X", "Not Dead Yet", "Resurrects self after death", "notdeadyet.png"),
+    ]),
+    _make("miks", "Miks", "Controller", [
+        ("C", "Harmonize", "Boosts an ally and Miks", "harmonize.png"),
+        ("Q", "M-Pulse", "Heals or Stuns", "mpulse.png"),
+        ("E", "Waveform", "Places a smoke cloud", "waveform.png"),
+        ("X", "Bassquake", "Cone that bumps and deafens", "bassquake.png"),
     ]),
 
     # ── Initiators ────────────────────────────────────────────────────────
@@ -193,6 +199,12 @@ ALL_AGENTS: list[Agent] = [
         ("Q", "Arc Rose", "Throws a metallic flash", "arcrose.png"),
         ("E", "Razorvine", "Creates a metallic vine zone", "razorvine.png"),
         ("X", "Steel Garden", "Disarms all enemies in range", "steelgarden.png"),
+    ]),
+    _make("veto", "Veto", "Sentinel", [
+        ("C", "Chokehold", "Places a trap on the ground", "chokehold.png"),
+        ("Q", "Crosscut", "places a tp on the ground", "crosscut.png"),
+        ("E", "Interceptor", "Catches thrown utility", "interceptor.png"),
+        ("X", "Evolution", "Health regen and utility invulnerability", "evolution.png"),
     ]),
 ]
 

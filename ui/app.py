@@ -3,9 +3,11 @@ Main application window — two TeamColumns with bookmark buttons between them.
 """
 from __future__ import annotations
 import tkinter as tk
+from tkinter import ttk
 from models.team import Team
 from ui import theme
 from ui.team_column import TeamColumn
+from translations.locale_manager import locale_manager
 
 
 class App(tk.Tk):
@@ -41,6 +43,9 @@ class App(tk.Tk):
                  bg=theme.BG_DARK,
                  fg=theme.TEXT_SECONDARY,
                  font=theme.FONT_SMALL).pack(side="left", padx=14)
+
+        # ── Language selector (right side of title bar) ───────────────────
+        self._build_lang_selector(title_bar)
 
         # ── Main content: left col | divider+bookmarks | right col ────────
         main = tk.Frame(self, bg=theme.BG_DARK)
@@ -86,6 +91,59 @@ class App(tk.Tk):
         # Wire bookmark refs so columns can reset them when picker closes via ✕
         self._col_a.set_bookmark(self._bookmark_a)
         self._col_b.set_bookmark(self._bookmark_b)
+
+    def _build_lang_selector(self, parent: tk.Frame):
+        """Build the language dropdown on the right end of the title bar."""
+        locales = locale_manager.available_locales()   # [{"code", "language"}, ...]
+
+        # Label
+        tk.Label(parent, text="🌐",
+                 bg=theme.BG_DARK, fg=theme.TEXT_SECONDARY,
+                 font=(theme.FONT_FAMILY, 10)).pack(side="right", padx=(4, 0))
+
+        # Style the combobox to match the dark theme
+        style = ttk.Style(self)
+        style.theme_use("clam")
+        style.configure("Lang.TCombobox",
+                        fieldbackground=theme.BG_INPUT,
+                        background=theme.BG_INPUT,
+                        foreground=theme.TEXT_PRIMARY,
+                        selectbackground=theme.ACCENT_RED,
+                        selectforeground="#ffffff",
+                        bordercolor=theme.BG_HOVER,
+                        arrowcolor=theme.TEXT_SECONDARY,
+                        relief="flat")
+        style.map("Lang.TCombobox",
+                  fieldbackground=[("readonly", theme.BG_INPUT)],
+                  foreground=[("readonly", theme.TEXT_PRIMARY)])
+
+        language_names = [loc["language"] for loc in locales]
+        current_name = next(
+            (loc["language"] for loc in locales
+             if loc["code"] == locale_manager.current_code),
+            language_names[0] if language_names else "English"
+        )
+
+        self._lang_var = tk.StringVar(value=current_name)
+        combo = ttk.Combobox(parent,
+                              textvariable=self._lang_var,
+                              values=language_names,
+                              state="readonly",
+                              width=12,
+                              style="Lang.TCombobox",
+                              font=(theme.FONT_FAMILY, 9))
+        combo.pack(side="right", padx=(0, 6))
+
+        def _on_lang_change(event=None):
+            selected_name = self._lang_var.get()
+            code = next(
+                (loc["code"] for loc in locales if loc["language"] == selected_name),
+                None
+            )
+            if code:
+                locale_manager.set_locale(code)
+
+        combo.bind("<<ComboboxSelected>>", _on_lang_change)
 
     def _build_divider(self, divider: tk.Frame):
         """Central strip: VS label + two bookmark buttons."""

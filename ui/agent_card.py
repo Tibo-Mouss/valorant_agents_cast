@@ -1,22 +1,24 @@
 """
 AgentCard — the widget displayed per agent slot when an agent is selected.
-Shows portrait, ability icons with names, ultimate highlighted separately.
-A red ✕ button in the top-right allows removal.
+
+Ability name labels are backed by tk.StringVar so they update instantly
+when the locale changes — no widget rebuild required.
 
 Layout (grid):
   col 0          col 1 (weight=1)
   ──────────     ──────────────────────────────────────
   portrait  │  row 0: Agent name
-  (rowspan) │  row 1: Role badge  |  [E] Signature ability
-            │  row 2: [C] ability   [Q] ability
+  (rowspan) │  row 1: Role badge  │  [E] Signature ability
+            │  row 2: [C] ability    [Q] ability
   ──────────────────────────────────────────────────────
   row 3 (colspan): ── Ultimate (full width) ──
 """
 from __future__ import annotations
 import tkinter as tk
-from models.agent import Agent
+from models.agent import Agent, Ability
 from ui import theme
 from ui.image_loader import agent_portrait, ability_icon
+from translations.locale_manager import locale_manager
 
 
 class AgentCard(tk.Frame):
@@ -31,64 +33,54 @@ class AgentCard(tk.Frame):
                          **kwargs)
         self._agent = agent
         self._on_remove = on_remove
-        self._images: list = []   # keep refs so GC doesn't collect them
+        self._images: list = []
+
+        # One StringVar per ability key — set on locale change without rebuilding
+        self._ability_vars: dict[str, tk.StringVar] = {}
 
         self._build()
+
+        # Subscribe; unsubscribe automatically when this widget is destroyed
+        locale_manager.subscribe(self._on_locale_change)
+        self.bind("<Destroy>", lambda e: locale_manager.unsubscribe(self._on_locale_change))
 
     # ── Construction ──────────────────────────────────────────────────────
 
     def _build(self):
         a = self._agent
-
-        # col 1 stretches to fill available width so ult bar goes edge-to-edge
         self.columnconfigure(1, weight=1)
 
-        # ── Remove button (top-right corner) ─────────────────────────────
-        remove_btn = tk.Button(
+        # ── Remove button ─────────────────────────────────────────────────
+        tk.Button(
             self, text="✕",
             bg=theme.BG_CARD, fg=theme.ACCENT_RED,
             activebackground=theme.ACCENT_RED, activeforeground="#ffffff",
             font=theme.FONT_SMALL, bd=0, cursor="hand2",
-            command=self._on_remove,
-            padx=2, pady=0,
-        )
-        remove_btn.place(relx=1.0, rely=0.0, anchor="ne", x=-2, y=2)
+            command=self._on_remove, padx=2, pady=0,
+        ).place(relx=1.0, rely=0.0, anchor="ne", x=-2, y=2)
 
-        # ── Col 0: portrait ──────────────────────────────────────────────
+        # ── Col 0: portrait ───────────────────────────────────────────────
         portrait_img = agent_portrait(a.id, theme.AGENT_THUMB)
         self._images.append(portrait_img)
-
-        portrait_lbl = tk.Label(self, image=portrait_img, bg=theme.BG_CARD)
-        portrait_lbl.grid(row=0, column=0, rowspan=3, padx=(8, 6), pady=(8, 4),
-                          sticky="nw")
+        tk.Label(self, image=portrait_img, bg=theme.BG_CARD).grid(
+            row=0, column=0, rowspan=3, padx=(8, 6), pady=(8, 4), sticky="nw")
 
         # ── Row 0: Agent name ─────────────────────────────────────────────
-        name_lbl = tk.Label(self,
-                             text=a.display_name,
-                             bg=theme.BG_CARD,
-                             fg=theme.TEXT_PRIMARY,
-                             font=theme.FONT_TITLE,
-                             anchor="w")
-        name_lbl.grid(row=0, column=1, sticky="sw", pady=(8, 1), padx=(0, 6))
+        tk.Label(self, text=a.display_name, bg=theme.BG_CARD,
+                 fg=theme.TEXT_PRIMARY, font=theme.FONT_TITLE, anchor="w").grid(
+            row=0, column=1, sticky="sw", pady=(8, 1), padx=(0, 6))
 
-        # ── Row 1: Role badge  +  E (signature) ability ───────────────────
+        # ── Row 1: Role badge + │ + E ability ────────────────────────────
         role_row = tk.Frame(self, bg=theme.BG_CARD)
         role_row.grid(row=1, column=1, sticky="ew", padx=(0, 6))
 
         role_color = theme.ROLE_COLORS.get(a.role, theme.TEXT_SECONDARY)
-        tk.Label(role_row,
-                 text=a.role.upper(),
-                 bg=theme.BG_CARD,
-                 fg=role_color,
-                 font=theme.FONT_SMALL,
-                 anchor="w").pack(side="left")
+        tk.Label(role_row, text=a.role.upper(), bg=theme.BG_CARD,
+                 fg=role_color, font=theme.FONT_SMALL, anchor="w").pack(side="left")
 
-        # Separator between role and E ability
-        tk.Label(role_row, text="  │  ",
-                 bg=theme.BG_CARD, fg=theme.TEXT_DISABLED,
-                 font=theme.FONT_SMALL).pack(side="left")
+        tk.Label(role_row, text="  │  ", bg=theme.BG_CARD,
+                 fg=theme.TEXT_DISABLED, font=theme.FONT_SMALL).pack(side="left")
 
-        # E ability (signature)
         sig = next((ab for ab in a.abilities if ab.key == "E"), None)
         if sig:
             self._pack_ability_inline(role_row, sig, ultimate=False)
@@ -103,19 +95,18 @@ class AgentCard(tk.Frame):
 
         # ── Row 3: Ultimate — full width ──────────────────────────────────
         if a.ultimate:
-            ult_frame = tk.Frame(self,
-                                  bg=theme.BG_PANEL,
+            ult_frame = tk.Frame(self, bg=theme.BG_PANEL,
                                   highlightbackground=theme.ACCENT_GOLD,
                                   highlightthickness=1)
-            # columnspan=2 covers portrait col + content col → true full width
             ult_frame.grid(row=3, column=0, columnspan=2,
                            padx=8, pady=(6, 8), sticky="ew")
             self._pack_ability_inline(ult_frame, a.ultimate, ultimate=True)
 
-    # ── Helpers ───────────────────────────────────────────────────────────
+    # ── Widget factory ────────────────────────────────────────────────────
 
-    def _pack_ability_inline(self, parent: tk.Frame, ability, ultimate: bool):
-        """Pack an icon + key/name label into *parent* (side=left)."""
+    def _pack_ability_inline(self, parent: tk.Frame, ability: Ability,
+                              ultimate: bool):
+        """Create icon + translatable label packed left into *parent*."""
         bg = parent.cget("bg")
 
         container = tk.Frame(parent, bg=bg)
@@ -124,12 +115,28 @@ class AgentCard(tk.Frame):
         icon_img = ability_icon(self._agent.id, ability.icon_filename,
                                 theme.ABILITY_ICON)
         self._images.append(icon_img)
-
         tk.Label(container, image=icon_img, bg=bg).pack(side="left", padx=(0, 3))
 
+        # StringVar so the label text updates without any widget rebuild
+        var = tk.StringVar(value=self._label_text(ability))
+        self._ability_vars[ability.key] = var
+
         fg = theme.ACCENT_GOLD if ultimate else theme.TEXT_PRIMARY
-        tk.Label(container,
-                 text=f"[{ability.key}] {ability.name}",
-                 bg=bg, fg=fg,
-                 font=(theme.FONT_FAMILY, 8, "bold") if ultimate else theme.FONT_ABILITY,
-                 anchor="w").pack(side="left")
+        font = (theme.FONT_FAMILY, 8, "bold") if ultimate else theme.FONT_ABILITY
+        tk.Label(container, textvariable=var, bg=bg, fg=fg,
+                 font=font, anchor="w").pack(side="left")
+
+    # ── Locale ────────────────────────────────────────────────────────────
+
+    def _label_text(self, ability: Ability) -> str:
+        """Build the display string for *ability* in the current locale."""
+        name = locale_manager.ability_name(
+            self._agent.id, ability.key, fallback=ability.name)
+        return f"[{ability.key}] {name}"
+
+    def _on_locale_change(self):
+        """Called by LocaleManager when the user picks a different language."""
+        for ab in self._agent.abilities:
+            var = self._ability_vars.get(ab.key)
+            if var is not None:
+                var.set(self._label_text(ab))

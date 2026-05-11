@@ -1,0 +1,35 @@
+{
+  "_meta": { "language": "Français", "code": "fr" },
+
+  "jett":     { "C": "Nuée",             "Q": "Envol",            "E": "Vent Arrière",     "X": "Tempête de lames" },
+  "reyna":    { "C": "Lorgner",          "Q": "Dévorer",          "E": "Congédier",        "X": "Impératrice" },
+  "phoenix":  { "C": "Embrasement",      "Q": "Balle courbe",     "E": "Mains brûlantes",  "X": "Retour en arrière" },
+  "raze":     { "C": "Bot explosif",     "Q": "Sac à explosifs",  "E": "Obus peinture",    "X": "Clou du spectacle" },
+  "yoru":     { "C": "Leurre",           "Q": "Angle mort",       "E": "Intrusion",        "X": "Dérive dimensionnelle" },
+  "neon":     { "C": "Voie rapide",      "Q": "Éclair rebondissant","E": "Pleine puissance","X": "Overdrive" },
+  "iso":      { "C": "Contingence",      "Q": "Double frappe",    "E": "Sous-couche",      "X": "Contrat mortel" },
+  "waylay":   { "C": "Hâte",             "Q": "Ricochet",         "E": "Radiance",         "X": "Convergence" },
+
+  "omen":     { "C": "Pas obscur",       "Q": "Paranoïa",         "E": "Couverture sombre","X": "Depuis les ombres" },
+  "brimstone":{ "C": "Incendiaire",      "Q": "Balise stimulante","E": "Fumée céleste",    "X": "Frappe orbitale" },
+  "viper":    { "C": "Morsure de serpent","Q": "Nuage de poison", "E": "Écran toxique",    "X": "Fosse de Viper" },
+  "astra":    { "C": "Nova pulsante",    "E": "Nébuleuse",        "Q": "Puits de gravité", "X": "Division cosmique" },
+  "harbor":   { "C": "Crique",           "Q": "Marée haute",      "E": "Cascade",          "X": "Jugement" },
+  "clove":    { "C": "Interférence",     "Q": "Remontant",        "E": "Écran de fumée",   "X": "Pas encore morte" },
+  "miks":    { "C": "Harmonisation",           "Q": "M-Pulsion",       "E": "Forme d'onde",     "X": "Basse sismique" },
+
+  "sova":     { "C": "Flèche électrique","Q": "Drone hibou",      "E": "Flèche de recon",  "X": "Furie du chasseur" },
+  "breach":   { "C": "Réplique",         "Q": "Point éclair",     "E": "Ligne de faille",  "X": "Tonnerre roulant" },
+  "skye":     { "C": "Repousse",         "Q": "Éclaireur",        "E": "Lumière guidante", "X": "Chercheurs" },
+  "kay_o":    { "C": "FRAG/ment",        "Q": "FLASH/drive",      "E": "ZÉRO/point",       "X": "NULL/cmd" },
+  "fade":     { "C": "Saisir",           "Q": "Hanter",           "E": "Rôdeur",           "X": "Nuit noire" },
+  "gekko":    { "C": "Étourdi",          "Q": "Bras droit",       "E": "Fracas",           "X": "Mosh Pit" },
+  "tejo":     { "C": "Drone furtif",     "Q": "Salve guidée",     "E": "Livraison spéciale","X": "Armageddon" },
+
+  "cypher":   { "C": "Cage cybernétique","Q": "Caméra espionne",  "E": "Fil de détection", "X": "Vol neural" },
+  "killjoy":  { "C": "Nano-essaim",      "Q": "Bot alarme",       "E": "Tourelle",         "X": "Confinement" },
+  "sage":     { "C": "Orbe ralentissant","Q": "Orbe de soin",     "E": "Orbe barrière",    "X": "Résurrection" },
+  "chamber":  { "C": "Marque de fabrique","Q": "Chasseur de têtes","E": "Rendez-vous",     "X": "Tour de force" },
+  "deadlock": { "C": "Maille barrière",  "Q": "Capteur sonique",  "E": "GravFilet",        "X": "Annihilation" },
+  "vyse":     { "C": "Cisaille",         "Q": "Rose d'arc",       "E": "Vigne tranchante", "X": "Jardin d'acier" }
+}
