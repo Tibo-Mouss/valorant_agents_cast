@@ -29,7 +29,7 @@ from models.agent import Agent, Ability
 _CHROMA = "#010101"
 
 # Width of each side column (px)
-_COL_W = 215
+_COL_W = 300
 
 # Portrait thumbnail size
 _THUMB = (32, 32)
@@ -225,7 +225,7 @@ class OverlayWindow(tk.Toplevel):
             col,
             text=(team.name or ("Team A" if not right else "Team B")).upper(),
             bg=_CHROMA, fg=accent,
-            font=(theme.FONT_FAMILY, 9, "bold"),
+            font=(theme.OVERLAY_FONT_TEAM_NAME),
             anchor="e" if right else "w",
         ).pack(fill="x", padx=2, pady=(0, 4))
 
@@ -294,8 +294,8 @@ class OverlayWindow(tk.Toplevel):
 
         # ── Abilities grid 2×2 ────────────────────────────────────────────
         ab_frame = tk.Frame(card, bg="#0A0C14")
-        ab_frame.grid(row=1, column=0, columnspan=2,
-                      sticky="ew", padx=6, pady=(0, 6))
+        ab_frame.grid(row=1, column=1,
+                      sticky="ew", padx=(0, 6), pady=(0, 6))
         ab_frame.columnconfigure(0, weight=1)
         ab_frame.columnconfigure(1, weight=1)
 

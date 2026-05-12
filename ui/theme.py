@@ -46,3 +46,8 @@ ABILITY_ICON   = 22           # ability icon size in card
 PICKER_ICON    = 36           # agent icon size in picker list
 BOOKMARK_W     = 22
 BOOKMARK_H     = 38
+
+
+# ── Overlay ────────────────────────────────────────────────────────────────
+
+OVERLAY_FONT_TEAM_NAME  = (FONT_FAMILY, 15, "bold")

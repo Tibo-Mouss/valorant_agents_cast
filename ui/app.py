@@ -65,7 +65,7 @@ class App(tk.Tk):
                  font=(theme.FONT_FAMILY, 13, "bold")).pack(side="left")
 
         tk.Label(title_bar,
-                 text="select agents · see ability names · cast better",
+                 text="Cast better",
                  bg=theme.BG_DARK,
                  fg=theme.TEXT_SECONDARY,
                  font=theme.FONT_SMALL).pack(side="left", padx=14)
@@ -181,9 +181,6 @@ class App(tk.Tk):
 
     def _build_overlay_controls(self, parent: tk.Frame):
         """Build screen selector and overlay on/off button."""
-        tk.Label(parent, text="🖥️",
-                 bg=theme.BG_DARK, fg=theme.TEXT_SECONDARY,
-                 font=(theme.FONT_FAMILY, 10)).pack(side="right", padx=(4, 0))
 
         screen_names = [screen.name for screen in self._screens]
         self._screen_combo = ttk.Combobox(parent,
@@ -196,16 +193,11 @@ class App(tk.Tk):
         self._screen_combo.pack(side="right", padx=(0, 6))
         self._screen_combo.bind("<<ComboboxSelected>>", self._on_screen_change)
 
-        self._overlay_btn = tk.Button(parent,
-                                     text="Overlay Off",
-                                     bg=theme.BG_DARK,
-                                     fg=theme.TEXT_SECONDARY,
-                                     activebackground=theme.ACCENT_RED,
-                                     activeforeground="#ffffff",
-                                     font=(theme.FONT_FAMILY, 9),
-                                     bd=0,
-                                     cursor="hand2",
-                                     command=self._toggle_overlay)
+        self._overlay_btn = ttk.Button(parent,
+                                        text="Activate Overlay",
+                                        style="OverlayToggle.Off.TButton",
+                                        cursor="hand2",
+                                        command=self._toggle_overlay)
         self._overlay_btn.pack(side="right", padx=(0, 6))
         self._update_overlay_button()
 
@@ -247,13 +239,11 @@ class App(tk.Tk):
 
     def _update_overlay_button(self):
         if self._overlay_enabled:
-            self._overlay_btn.configure(text="Overlay On",
-                                       bg=theme.ACCENT_RED,
-                                       fg="#ffffff")
+            self._overlay_btn.configure(text="Disable Overlay",
+                                       style="OverlayToggle.On.TButton")
         else:
-            self._overlay_btn.configure(text="Overlay Off",
-                                       bg=theme.BG_DARK,
-                                       fg=theme.TEXT_SECONDARY)
+            self._overlay_btn.configure(text="Activate Overlay",
+                                       style="OverlayToggle.Off.TButton")
 
     def _refresh_overlay(self):
         if self._overlay_enabled and self._overlay_window:
