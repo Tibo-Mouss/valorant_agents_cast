@@ -8,6 +8,8 @@ from models.team import Team
 from ui import theme
 from ui.team_column import TeamColumn
 from translations.locale_manager import locale_manager
+from ui.image_loader import agent_portrait
+from data.agents import ALL_AGENTS
 
 
 class App(tk.Tk):
@@ -23,7 +25,24 @@ class App(tk.Tk):
         self._team_a = Team("Team A")
         self._team_b = Team("Team B")
 
+        # Pre-cache agent portrait images for the picker (runs in background)
+        self._pre_cache_images()
+
         self._build()
+
+    def _pre_cache_images(self):
+        """
+        Pre-load agent portrait images in the background.
+        This speeds up the agent picker UI since all images will already be cached
+        when the picker opens, eliminating the initial load delay.
+        """
+        def cache_images():
+            for agent in ALL_AGENTS:
+                # Load at the picker icon size to cache it
+                agent_portrait(agent.id, theme.PICKER_ICON)
+        
+        # Schedule on next event loop iteration to not block UI startup
+        self.after(100, cache_images)
 
     # ── Layout ────────────────────────────────────────────────────────────
 
@@ -46,6 +65,9 @@ class App(tk.Tk):
 
         # ── Language selector (right side of title bar) ───────────────────
         self._build_lang_selector(title_bar)
+
+        # ── Team names row with swap button ───────────────────────────────
+        self._build_team_names_row()
 
         # ── Main content: left col | divider+bookmarks | right col ────────
         main = tk.Frame(self, bg=theme.BG_DARK)
@@ -70,6 +92,7 @@ class App(tk.Tk):
             side="left",
             team=self._team_a,
             get_opposite_frame=lambda: self._right_frame,
+            show_team_name=False,
         )
         self._col_a.pack(fill="both", expand=True)
 
@@ -78,6 +101,7 @@ class App(tk.Tk):
             side="right",
             team=self._team_b,
             get_opposite_frame=lambda: self._left_frame,
+            show_team_name=False,
         )
         self._col_b.pack(fill="both", expand=True)
 
@@ -145,6 +169,124 @@ class App(tk.Tk):
 
         combo.bind("<<ComboboxSelected>>", _on_lang_change)
 
+    def _build_team_names_row(self):
+        """Build the team names row with swap button in the middle."""
+        names_row = tk.Frame(self, bg=theme.BG_DARK)
+        names_row.pack(fill="x", padx=8, pady=8)
+
+        names_row.columnconfigure(0, weight=1)
+        names_row.columnconfigure(1, weight=0)
+        names_row.columnconfigure(2, weight=1)
+
+        # Left team name input
+        left_frame = tk.Frame(names_row, bg=theme.BG_DARK)
+        left_frame.grid(row=0, column=0, sticky="ew", padx=(0, 8))
+
+        # Store reference so we can update it later
+        self._team_a_name_var = tk.StringVar(value=self._team_a.name)
+        self._team_a_name_var.trace_add("write",
+                                        lambda *_: setattr(self._team_a, "name",
+                                                           self._team_a_name_var.get()))
+        team_a_entry = tk.Entry(left_frame,
+                                textvariable=self._team_a_name_var,
+                                bg=theme.BG_INPUT,
+                                fg=theme.TEXT_PRIMARY,
+                                insertbackground=theme.TEXT_PRIMARY,
+                                relief="flat",
+                                font=theme.FONT_TITLE,
+                                bd=4)
+        team_a_entry.pack(fill="x", ipady=4)
+
+        # Swap button in the middle
+        swap_btn = tk.Button(names_row,
+                              text="⇄",
+                              bg=theme.BG_DARK,
+                              fg=theme.TEXT_SECONDARY,
+                              activebackground=theme.ACCENT_RED,
+                              activeforeground="#fff",
+                              font=(theme.FONT_FAMILY, 16, "bold"),
+                              bd=0,
+                              cursor="hand2",
+                              command=self._swap_teams,
+                              padx=12,
+                              pady=4)
+        swap_btn.grid(row=0, column=1, padx=8)
+
+        # Right team name input
+        right_frame = tk.Frame(names_row, bg=theme.BG_DARK)
+        right_frame.grid(row=0, column=2, sticky="ew", padx=(8, 0))
+
+        self._team_b_name_var = tk.StringVar(value=self._team_b.name)
+        self._team_b_name_var.trace_add("write",
+                                        lambda *_: setattr(self._team_b, "name",
+                                                           self._team_b_name_var.get()))
+        team_b_entry = tk.Entry(right_frame,
+                                textvariable=self._team_b_name_var,
+                                bg=theme.BG_INPUT,
+                                fg=theme.TEXT_PRIMARY,
+                                insertbackground=theme.TEXT_PRIMARY,
+                                relief="flat",
+                                font=theme.FONT_TITLE,
+                                bd=4)
+        team_b_entry.pack(fill="x", ipady=4)
+
+    # ── Build lang selector ────────────────────────────────────────────────
+
+    def _build_lang_selector(self, parent: tk.Frame):
+        """Build the language dropdown on the right end of the title bar."""
+        locales = locale_manager.available_locales()   # [{"code", "language"}, ...]
+
+        # Label
+        tk.Label(parent, text="🌐",
+                 bg=theme.BG_DARK, fg=theme.TEXT_SECONDARY,
+                 font=(theme.FONT_FAMILY, 10)).pack(side="right", padx=(4, 0))
+
+        # Style the combobox to match the dark theme
+        style = ttk.Style(self)
+        style.theme_use("clam")
+        style.configure("Lang.TCombobox",
+                        fieldbackground=theme.BG_INPUT,
+                        background=theme.BG_INPUT,
+                        foreground=theme.TEXT_PRIMARY,
+                        selectbackground=theme.ACCENT_RED,
+                        selectforeground="#ffffff",
+                        bordercolor=theme.BG_HOVER,
+                        arrowcolor=theme.TEXT_SECONDARY,
+                        relief="flat")
+        style.map("Lang.TCombobox",
+                  fieldbackground=[("readonly", theme.BG_INPUT)],
+                  foreground=[("readonly", theme.TEXT_PRIMARY)])
+
+        language_names = [loc["language"] for loc in locales]
+        current_name = next(
+            (loc["language"] for loc in locales
+             if loc["code"] == locale_manager.current_code),
+            language_names[0] if language_names else "English"
+        )
+
+        self._lang_var = tk.StringVar(value=current_name)
+        combo = ttk.Combobox(parent,
+                              textvariable=self._lang_var,
+                              values=language_names,
+                              state="readonly",
+                              width=12,
+                              style="Lang.TCombobox",
+                              font=(theme.FONT_FAMILY, 9))
+        combo.pack(side="right", padx=(0, 6))
+
+        def _on_lang_change(event=None):
+            selected_name = self._lang_var.get()
+            code = next(
+                (loc["code"] for loc in locales if loc["language"] == selected_name),
+                None
+            )
+            if code:
+                locale_manager.set_locale(code)
+
+        combo.bind("<<ComboboxSelected>>", _on_lang_change)
+
+    # ── Build divider ──────────────────────────────────────────────────────
+
     def _build_divider(self, divider: tk.Frame):
         """Central strip: VS label + two bookmark buttons."""
         # Centre everything vertically
@@ -166,6 +308,15 @@ class App(tk.Tk):
                                            side="left",
                                            on_click=self._col_b.open_picker)
         self._bookmark_b.pack(pady=(8, 0))
+
+    def _swap_teams(self):
+        """Swap team names and agents between left and right columns."""
+        self._team_a.swap_with(self._team_b)
+        # Refresh both columns to display the swapped data
+        self._team_a_name_var.set(self._team_a.name)
+        self._team_b_name_var.set(self._team_b.name)
+        self._col_a._render_all_slots()
+        self._col_b._render_all_slots()
 
 
 # ── BookmarkButton ────────────────────────────────────────────────────────

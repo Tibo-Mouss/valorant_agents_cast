@@ -24,6 +24,7 @@ class TeamColumn(tk.Frame):
                  side: str,
                  team: Team,
                  get_opposite_frame: callable,
+                 show_team_name: bool = True,
                  **kwargs):
         super().__init__(parent, bg=theme.BG_PANEL, **kwargs)
         self._side = side
@@ -31,6 +32,7 @@ class TeamColumn(tk.Frame):
         self._get_opposite_frame = get_opposite_frame
         self._picker: AgentPicker | None = None
         self._slot_frames: list[tk.Frame] = []
+        self._show_team_name = show_team_name
         # Injected by App after both columns exist
         self._bookmark: tk.Widget | None = None
 
@@ -46,27 +48,29 @@ class TeamColumn(tk.Frame):
 
     def _build(self):
         # ── Team name input ───────────────────────────────────────────────
-        name_row = tk.Frame(self, bg=theme.BG_PANEL)
-        name_row.pack(fill="x", padx=10, pady=(10, 6))
+        if self._show_team_name:
+            name_row = tk.Frame(self, bg=theme.BG_PANEL)
+            name_row.pack(fill="x", padx=10, pady=(10, 6))
 
-        label_text = "TEAM A" if self._side == "left" else "TEAM B"
-        tk.Label(name_row, text=label_text,
-                 bg=theme.BG_PANEL, fg=theme.ACCENT_RED,
-                 font=(theme.FONT_FAMILY, 8, "bold")).pack(anchor="w")
-
-        self._name_var = tk.StringVar(value=self._team.name)
-        self._name_var.trace_add("write",
-                                  lambda *_: setattr(self._team, "name",
-                                                     self._name_var.get()))
-        name_entry = tk.Entry(name_row,
-                               textvariable=self._name_var,
-                               bg=theme.BG_INPUT,
-                               fg=theme.TEXT_PRIMARY,
-                               insertbackground=theme.TEXT_PRIMARY,
-                               relief="flat",
-                               font=theme.FONT_TITLE,
-                               bd=4)
-        name_entry.pack(fill="x", ipady=4)
+            self._name_var = tk.StringVar(value=self._team.name)
+            self._name_var.trace_add("write",
+                                      lambda *_: setattr(self._team, "name",
+                                                         self._name_var.get()))
+            name_entry = tk.Entry(name_row,
+                                   textvariable=self._name_var,
+                                   bg=theme.BG_INPUT,
+                                   fg=theme.TEXT_PRIMARY,
+                                   insertbackground=theme.TEXT_PRIMARY,
+                                   relief="flat",
+                                   font=theme.FONT_TITLE,
+                                   bd=4)
+            name_entry.pack(fill="x", ipady=4)
+        else:
+            # Create the StringVar anyway so it can be accessed by App
+            self._name_var = tk.StringVar(value=self._team.name)
+            self._name_var.trace_add("write",
+                                      lambda *_: setattr(self._team, "name",
+                                                         self._name_var.get()))
 
         # ── Agent slots ───────────────────────────────────────────────────
         slots_container = tk.Frame(self, bg=theme.BG_PANEL)

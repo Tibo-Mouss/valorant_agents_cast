@@ -29,11 +29,11 @@ ROLE_COLORS = {
 
 # ── Typography ────────────────────────────────────────────────────────────
 FONT_FAMILY    = "Segoe UI"     # Falls back gracefully on Linux/Mac
-FONT_TITLE     = (FONT_FAMILY, 11, "bold")
-FONT_BODY      = (FONT_FAMILY, 9)
-FONT_SMALL     = (FONT_FAMILY, 8)
-FONT_ABILITY   = (FONT_FAMILY, 8, "bold")
-FONT_ULTIMATE  = (FONT_FAMILY, 8, "bold")
+FONT_TITLE     = (FONT_FAMILY, 12, "bold")
+FONT_BODY      = (FONT_FAMILY, 10)
+FONT_SMALL     = (FONT_FAMILY, 9)
+FONT_ABILITY   = (FONT_FAMILY, 10)
+FONT_ULTIMATE  = (FONT_FAMILY, 11, "bold")
 
 # ── Layout ────────────────────────────────────────────────────────────────
 WINDOW_MIN_W   = 900

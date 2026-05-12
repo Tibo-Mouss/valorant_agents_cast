@@ -122,7 +122,7 @@ class AgentCard(tk.Frame):
         self._ability_vars[ability.key] = var
 
         fg = theme.ACCENT_GOLD if ultimate else theme.TEXT_PRIMARY
-        font = (theme.FONT_FAMILY, 8, "bold") if ultimate else theme.FONT_ABILITY
+        font = theme.FONT_ULTIMATE if ultimate else theme.FONT_ABILITY
         tk.Label(container, textvariable=var, bg=bg, fg=fg,
                  font=font, anchor="w").pack(side="left")
 

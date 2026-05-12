@@ -49,3 +49,8 @@ class Team:
 
     def selected_agents(self) -> list[Agent]:
         return [a for a in self._agents if a is not None]
+
+    def swap_with(self, other: "Team") -> None:
+        """Swap name and agents with another team."""
+        self.name, other.name = other.name, self.name
+        self._agents, other._agents = other._agents, self._agents
