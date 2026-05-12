@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import sys
 import tkinter as tk
+import tkinter.font as tkfont
 from dataclasses import dataclass
 from ctypes import wintypes
 import ctypes
@@ -30,6 +31,9 @@ _CHROMA = "#010101"
 
 # Width of each side column (px)
 _COL_W = 300
+
+# Height percentage of Overlay's Boxes from top
+_HEIGHT_OVERLAY_PERCENT = 0.5
 
 # Portrait thumbnail size
 _THUMB = (32, 32)
@@ -199,11 +203,11 @@ class OverlayWindow(tk.Toplevel):
 
         # Left column — Team A
         self._left_col = tk.Frame(canvas, bg=_CHROMA)
-        self._left_col.place(x=10, y=36, width=_COL_W)
+        self._left_col.place(x=10, y=int(self._screen.height * _HEIGHT_OVERLAY_PERCENT), width=_COL_W)
 
         # Right column — Team B
         self._right_col = tk.Frame(canvas, bg=_CHROMA)
-        self._right_col.place(relx=1.0, x=-(10 + _COL_W), y=36, width=_COL_W)
+        self._right_col.place(relx=1.0, x=-(10 + _COL_W), y=int(self._screen.height * _HEIGHT_OVERLAY_PERCENT), width=_COL_W)
 
         self._refresh()
 
@@ -221,13 +225,37 @@ class OverlayWindow(tk.Toplevel):
             child.destroy()
 
         # Team name label
-        tk.Label(
+        text = (team.name or ("Team A" if not right else "Team B")).upper()
+        label_font = tkfont.Font(family=theme.FONT_FAMILY, size=15, weight="bold")
+        text_width = label_font.measure(text)
+        text_height = label_font.metrics("linespace")
+        pad_x = 10
+        pad_y = 4
+        width = text_width + pad_x * 2
+        height = text_height + pad_y * 2
+        radius = 8
+
+        label_canvas = tk.Canvas(
             col,
-            text=(team.name or ("Team A" if not right else "Team B")).upper(),
-            bg=_CHROMA, fg=accent,
-            font=(theme.OVERLAY_FONT_TEAM_NAME),
-            anchor="e" if right else "w",
-        ).pack(fill="x", padx=2, pady=(0, 4))
+            width=width,
+            height=height,
+            bg=_CHROMA,
+            highlightthickness=0,
+        )
+        label_canvas.create_arc(0, 0, radius*2, radius*2, start=90, extent=90, fill="#0A0C14", outline="#0A0C14")
+        label_canvas.create_arc(width-radius*2, 0, width, radius*2, start=0, extent=90, fill="#0A0C14", outline="#0A0C14")
+        label_canvas.create_arc(0, height-radius*2, radius*2, height, start=180, extent=90, fill="#0A0C14", outline="#0A0C14")
+        label_canvas.create_arc(width-radius*2, height-radius*2, width, height, start=270, extent=90, fill="#0A0C14", outline="#0A0C14")
+        label_canvas.create_rectangle(radius, 0, width-radius, height, fill="#0A0C14", outline="#0A0C14")
+        label_canvas.create_rectangle(0, radius, width, height-radius, fill="#0A0C14", outline="#0A0C14")
+        label_canvas.create_text(
+            width // 2,
+            height // 2,
+            text=text,
+            fill=accent,
+            font=label_font,
+        )
+        label_canvas.pack(anchor="center", pady=(0, 4))
 
         agents = team.selected_agents()
         if not agents:
