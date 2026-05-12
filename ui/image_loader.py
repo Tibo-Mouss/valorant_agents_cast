@@ -75,3 +75,10 @@ def ability_icon(agent_id: str, icon_filename: str, size: int) -> "ImageTk.Photo
     path = Path("abilities") / agent_id / icon_filename
     return load_image(path, size, size, placeholder_color="#2a3040",
                       placeholder_text="?")
+
+
+def role_icon(role: str, size: int) -> "ImageTk.PhotoImage | tk.PhotoImage":
+    filename = f"{role.lower()}.png"
+    path = Path("roles") / filename
+    return load_image(path, size, size, placeholder_color="#2a3040",
+                      placeholder_text=role[:2].upper())

@@ -10,7 +10,7 @@ import tkinter as tk
 from models.agent import Agent
 from data.agents import ALL_AGENTS
 from ui import theme
-from ui.image_loader import agent_portrait
+from ui.image_loader import agent_portrait, role_icon
 
 # Columns in the agent grid
 GRID_COLS = 4
@@ -119,7 +119,10 @@ class AgentPicker(tk.Frame):
 
             # Role header — spans all columns
             role_color = theme.ROLE_COLORS.get(role, theme.TEXT_SECONDARY)
-            tk.Label(self._inner, text=role.upper(),
+            icon = role_icon(role, 16)
+            self._images.append(icon)
+            tk.Label(self._inner, image=icon, text=f" {role.upper()}",
+                     compound="left",
                      bg=theme.BG_OVERLAY, fg=role_color,
                      font=(theme.FONT_FAMILY, 8, "bold"),
                      anchor="w").grid(row=current_row, column=0,
