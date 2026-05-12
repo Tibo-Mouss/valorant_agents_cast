@@ -40,16 +40,31 @@ def _placeholder_tk(width: int, height: int) -> tk.PhotoImage:
     return img
 
 
+def _normalize_size(size: int | tuple[int, int]) -> tuple[int, int]:
+    if isinstance(size, tuple):
+        return size
+    return (size, size)
+
+
 # ── Public API ────────────────────────────────────────────────────────────
 
 @lru_cache(maxsize=512)
-def load_image(path: str | Path, width: int, height: int,
+def load_image(path: str | Path, width: int | tuple[int, int],
+               height: int | None = None,
                placeholder_color: str = "#2a3040",
                placeholder_text: str = "") -> "ImageTk.PhotoImage | tk.PhotoImage":
     """
     Load an image from *path*, resize to (width, height), return a Tk-compatible object.
     Returns a placeholder if the file is missing or unreadable.
     """
+    if isinstance(width, tuple):
+        width, height = width
+    elif height is None:
+        raise ValueError("height must be provided when width is an int")
+
+    assert height is not None
+    width, height = _normalize_size((width, height))
+
     p = Path(path)
     if not p.is_absolute():
         p = ASSETS_ROOT / p
@@ -65,20 +80,23 @@ def load_image(path: str | Path, width: int, height: int,
         return _placeholder_tk(width, height)
 
 
-def agent_portrait(agent_id: str, size: int) -> "ImageTk.PhotoImage | tk.PhotoImage":
+def agent_portrait(agent_id: str, size: int | tuple[int, int]) -> "ImageTk.PhotoImage | tk.PhotoImage":
     path = Path("agents") / f"{agent_id}.png"
-    return load_image(path, size, size, placeholder_color="#1e2636",
+    size = _normalize_size(size)
+    return load_image(path, size, placeholder_color="#1e2636",
                       placeholder_text=agent_id[:2].upper())
 
 
-def ability_icon(agent_id: str, icon_filename: str, size: int) -> "ImageTk.PhotoImage | tk.PhotoImage":
+def ability_icon(agent_id: str, icon_filename: str, size: int | tuple[int, int]) -> "ImageTk.PhotoImage | tk.PhotoImage":
     path = Path("abilities") / agent_id / icon_filename
-    return load_image(path, size, size, placeholder_color="#2a3040",
+    size = _normalize_size(size)
+    return load_image(path, size, placeholder_color="#2a3040",
                       placeholder_text="?")
 
 
-def role_icon(role: str, size: int) -> "ImageTk.PhotoImage | tk.PhotoImage":
+def role_icon(role: str, size: int | tuple[int, int]) -> "ImageTk.PhotoImage | tk.PhotoImage":
     filename = f"{role.lower()}.png"
     path = Path("roles") / filename
-    return load_image(path, size, size, placeholder_color="#2a3040",
+    size = _normalize_size(size)
+    return load_image(path, size, placeholder_color="#2a3040",
                       placeholder_text=role[:2].upper())

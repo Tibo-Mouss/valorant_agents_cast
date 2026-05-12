@@ -9,6 +9,7 @@ from ui import theme
 from ui.team_column import TeamColumn
 from translations.locale_manager import locale_manager
 from ui.image_loader import agent_portrait
+from ui.overlay_window import OverlayWindow, ScreenInfo, available_screens
 from data.agents import ALL_AGENTS
 
 
@@ -24,6 +25,12 @@ class App(tk.Tk):
         # Model
         self._team_a = Team("Team A")
         self._team_b = Team("Team B")
+
+        # Overlay state
+        self._overlay_window: OverlayWindow | None = None
+        self._overlay_enabled = False
+        self._screens: list[ScreenInfo] = available_screens(self)
+        self._screen_var = tk.StringVar(value=self._screens[0].name if self._screens else "Screen 1")
 
         # Pre-cache agent portrait images for the picker (runs in background)
         self._pre_cache_images()
@@ -63,8 +70,9 @@ class App(tk.Tk):
                  fg=theme.TEXT_SECONDARY,
                  font=theme.FONT_SMALL).pack(side="left", padx=14)
 
-        # ── Language selector (right side of title bar) ───────────────────
+        # ── Language and overlay controls (right side of title bar) ─────
         self._build_lang_selector(title_bar)
+        self._build_overlay_controls(title_bar)
 
         # ── Team names row with swap button ───────────────────────────────
         self._build_team_names_row()
@@ -93,6 +101,7 @@ class App(tk.Tk):
             team=self._team_a,
             get_opposite_frame=lambda: self._right_frame,
             show_team_name=False,
+            on_team_change=self._refresh_overlay,
         )
         self._col_a.pack(fill="both", expand=True)
 
@@ -102,6 +111,7 @@ class App(tk.Tk):
             team=self._team_b,
             get_opposite_frame=lambda: self._left_frame,
             show_team_name=False,
+            on_team_change=self._refresh_overlay,
         )
         self._col_b.pack(fill="both", expand=True)
 
@@ -169,6 +179,88 @@ class App(tk.Tk):
 
         combo.bind("<<ComboboxSelected>>", _on_lang_change)
 
+    def _build_overlay_controls(self, parent: tk.Frame):
+        """Build screen selector and overlay on/off button."""
+        tk.Label(parent, text="🖥️",
+                 bg=theme.BG_DARK, fg=theme.TEXT_SECONDARY,
+                 font=(theme.FONT_FAMILY, 10)).pack(side="right", padx=(4, 0))
+
+        screen_names = [screen.name for screen in self._screens]
+        self._screen_combo = ttk.Combobox(parent,
+                                         textvariable=self._screen_var,
+                                         values=screen_names,
+                                         state="readonly",
+                                         width=12,
+                                         style="Lang.TCombobox",
+                                         font=(theme.FONT_FAMILY, 9))
+        self._screen_combo.pack(side="right", padx=(0, 6))
+        self._screen_combo.bind("<<ComboboxSelected>>", self._on_screen_change)
+
+        self._overlay_btn = tk.Button(parent,
+                                     text="Overlay Off",
+                                     bg=theme.BG_DARK,
+                                     fg=theme.TEXT_SECONDARY,
+                                     activebackground=theme.ACCENT_RED,
+                                     activeforeground="#ffffff",
+                                     font=(theme.FONT_FAMILY, 9),
+                                     bd=0,
+                                     cursor="hand2",
+                                     command=self._toggle_overlay)
+        self._overlay_btn.pack(side="right", padx=(0, 6))
+        self._update_overlay_button()
+
+    def _get_selected_screen(self) -> ScreenInfo | None:
+        return next((screen for screen in self._screens
+                     if screen.name == self._screen_var.get()),
+                    self._screens[0] if self._screens else None)
+
+    def _on_screen_change(self, event=None):
+        if self._overlay_enabled and self._overlay_window:
+            selected = self._get_selected_screen()
+            if selected:
+                self._overlay_window.refresh(selected)
+
+    def _toggle_overlay(self):
+        self._overlay_enabled = not self._overlay_enabled
+        if self._overlay_enabled:
+            selected = self._get_selected_screen()
+            if selected:
+                self._overlay_window = OverlayWindow(
+                    self,
+                    self._team_a,
+                    self._team_b,
+                    selected,
+                    on_close=self._set_overlay_off,
+                )
+        else:
+            if self._overlay_window and self._overlay_window.winfo_exists():
+                self._overlay_window.destroy()
+            self._overlay_window = None
+        self._update_overlay_button()
+
+    def _set_overlay_off(self):
+        self._overlay_enabled = False
+        if self._overlay_window and self._overlay_window.winfo_exists():
+            self._overlay_window.destroy()
+        self._overlay_window = None
+        self._update_overlay_button()
+
+    def _update_overlay_button(self):
+        if self._overlay_enabled:
+            self._overlay_btn.configure(text="Overlay On",
+                                       bg=theme.ACCENT_RED,
+                                       fg="#ffffff")
+        else:
+            self._overlay_btn.configure(text="Overlay Off",
+                                       bg=theme.BG_DARK,
+                                       fg=theme.TEXT_SECONDARY)
+
+    def _refresh_overlay(self):
+        if self._overlay_enabled and self._overlay_window:
+            selected = self._get_selected_screen()
+            if selected:
+                self._overlay_window.refresh(selected)
+
     def _build_team_names_row(self):
         """Build the team names row with swap button in the middle."""
         names_row = tk.Frame(self, bg=theme.BG_DARK)
@@ -184,9 +276,10 @@ class App(tk.Tk):
 
         # Store reference so we can update it later
         self._team_a_name_var = tk.StringVar(value=self._team_a.name)
-        self._team_a_name_var.trace_add("write",
-                                        lambda *_: setattr(self._team_a, "name",
-                                                           self._team_a_name_var.get()))
+        def _on_a_name_change(*_):
+            self._team_a.name = self._team_a_name_var.get()
+            self._refresh_overlay()
+        self._team_a_name_var.trace_add("write", _on_a_name_change)
         team_a_entry = tk.Entry(left_frame,
                                 textvariable=self._team_a_name_var,
                                 bg=theme.BG_INPUT,
@@ -217,9 +310,10 @@ class App(tk.Tk):
         right_frame.grid(row=0, column=2, sticky="ew", padx=(8, 0))
 
         self._team_b_name_var = tk.StringVar(value=self._team_b.name)
-        self._team_b_name_var.trace_add("write",
-                                        lambda *_: setattr(self._team_b, "name",
-                                                           self._team_b_name_var.get()))
+        def _on_b_name_change(*_):
+            self._team_b.name = self._team_b_name_var.get()
+            self._refresh_overlay()
+        self._team_b_name_var.trace_add("write", _on_b_name_change)
         team_b_entry = tk.Entry(right_frame,
                                 textvariable=self._team_b_name_var,
                                 bg=theme.BG_INPUT,
@@ -317,6 +411,7 @@ class App(tk.Tk):
         self._team_b_name_var.set(self._team_b.name)
         self._col_a._render_all_slots()
         self._col_b._render_all_slots()
+        self._refresh_overlay()
 
 
 # ── BookmarkButton ────────────────────────────────────────────────────────

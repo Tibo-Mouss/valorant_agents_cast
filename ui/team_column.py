@@ -25,6 +25,7 @@ class TeamColumn(tk.Frame):
                  team: Team,
                  get_opposite_frame: callable,
                  show_team_name: bool = True,
+                 on_team_change: callable | None = None,
                  **kwargs):
         super().__init__(parent, bg=theme.BG_PANEL, **kwargs)
         self._side = side
@@ -33,6 +34,7 @@ class TeamColumn(tk.Frame):
         self._picker: AgentPicker | None = None
         self._slot_frames: list[tk.Frame] = []
         self._show_team_name = show_team_name
+        self._on_team_change = on_team_change
         # Injected by App after both columns exist
         self._bookmark: tk.Widget | None = None
 
@@ -115,6 +117,8 @@ class TeamColumn(tk.Frame):
     def _render_all_slots(self):
         for i in range(MAX_AGENTS):
             self._render_slot(i)
+        if self._on_team_change:
+            self._on_team_change()
 
     # ── Agent management ──────────────────────────────────────────────────
 
