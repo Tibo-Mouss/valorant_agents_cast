@@ -176,6 +176,15 @@ class OverlayWindow(tk.Toplevel):
         self.bind("<Destroy>", lambda _: locale_manager.unsubscribe(self._refresh))
 
         self.deiconify()
+        self._ensure_topmost()
+
+    def _ensure_topmost(self):
+        """Keep the overlay window flagged as always-on-top."""
+        if not self.winfo_exists():
+            return
+        self.attributes("-topmost", True)
+        self.lift()
+        self.after(2000, self._ensure_topmost)
 
     # ── Geometry ───────────────────────────────────────────────────────────
 
